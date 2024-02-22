@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <canvas id="input"></canvas>
+    <canvas id="output"></canvas>
+</body>
+<script>
+    const inputCanv = document.querySelector("#input")
+    const outputCanv = document.querySelector("#output")
+    const img = new Image()    
+
+    
+    img.src = "gibbon-8573117_1280.jpg"
+    const cellSize = 8
+    const isGrayScale = false
+    img.onload = () => {
+        inputCanv.style.width = img.width/2 + "px"
+        inputCanv.style.height = img.height/2 + "px"
+        outputCanv.style.width = img.width/2 + "px"
+        outputCanv.style.height = img.height/2 + "px"
+        const inputCtx = inputCanv.getContext("2d",{ willReadFrequently: true })
+        const outputCtx = outputCanv.getContext("2d")
+
+        const canvasWidth = inputCanv.width
+        const canvasHeigth = inputCanv.height
+        inputCtx.drawImage(img, 0, 0,canvasWidth,canvasHeigth)
+        if(cellSize != 0) {
+            for(x = 0; x < canvasWidth; x+= cellSize){
+                for(y = 0; y < canvasWidth; y+= cellSize){
+                    let sumR = 0
+                    let sumG = 0
+                    let sumB = 0
+                    let sumA = 0
+                    let c = 0
+                    const data = inputCtx.getImageData(x, y, cellSize,cellSize).data
+                    for(i = 0; i < data.length; i+= 4){                        
+                        sumR += data[i]
+                        sumG += data[i+1]
+                        sumB += data[i+2]
+                        sumA += data[i+3]
+                        c++
+                    }
+                    sumR = sumR / c
+                    sumG = sumG / c
+                    sumB = sumB / c
+                    sumA = sumA / c
+                    grayScale = (sumA + sumB + sumG) / 3
+                    if(isGrayScale)
+                        outputCtx.fillStyle = `rgba(${grayScale},${grayScale},${grayScale},${sumA})`
+                    else
+                        outputCtx.fillStyle = `rgba(${sumR},${sumG},${sumB},${sumA})`
+                    outputCtx.fillRect(x,y,cellSize,cellSize)
+
+                }
+            }
+        }       
+    }
+</script>
+</html>
