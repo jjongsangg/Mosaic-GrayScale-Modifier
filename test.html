@@ -8,21 +8,32 @@
 <body>
     <canvas id="input"></canvas>
     <canvas id="output"></canvas>
+    <textarea id="textoutput" cols="300" rows="100" spellcheck="false"></textarea>
 </body>
 <script>
     const inputCanv = document.querySelector("#input")
     const outputCanv = document.querySelector("#output")
+    const textOutput = document.querySelector("#textoutput")
     const img = new Image()    
-
     
-    img.src = "gibbon-8573117_1280.jpg"
-    const cellSize = 8
-    const isGrayScale = false
+    // it's string set for text_mosaic
+    const chars = ["■","▩","▦","▣","ㄾ","㉿","‡","::",":.",".."," ."," ."] // Try Change it.
+    
+    img.src = //Just input Image Src Here!
+    const colorWeightValue = 256 // Try Change it.
+    const colorWeight = 256 / colorWeightValue // fixed
+    const cellSize = 8 // Try Change it.
+    const isGrayScale = true // Try Change it.
+
+    // Main func
     img.onload = () => {
         inputCanv.style.width = img.width/2 + "px"
         inputCanv.style.height = img.height/2 + "px"
         outputCanv.style.width = img.width/2 + "px"
         outputCanv.style.height = img.height/2 + "px"
+        textOutput.cols = img.width / 1.75
+        textOutput.rows = img.height / 1.75
+        textOutput.style.fontSize = (4) + "px"
         const inputCtx = inputCanv.getContext("2d",{ willReadFrequently: true })
         const outputCtx = outputCanv.getContext("2d")
 
@@ -30,8 +41,8 @@
         const canvasHeigth = inputCanv.height
         inputCtx.drawImage(img, 0, 0,canvasWidth,canvasHeigth)
         if(cellSize != 0) {
-            for(x = 0; x < canvasWidth; x+= cellSize){
-                for(y = 0; y < canvasWidth; y+= cellSize){
+            for(y = 0; y < canvasHeigth; y+= cellSize){
+                for(x = 0; x < canvasWidth; x+= cellSize){
                     let sumR = 0
                     let sumG = 0
                     let sumB = 0
@@ -45,11 +56,17 @@
                         sumA += data[i+3]
                         c++
                     }
-                    sumR = sumR / c
-                    sumG = sumG / c
-                    sumB = sumB / c
-                    sumA = sumA / c
+                    sumR = Math.round(sumR / c / colorWeight) * colorWeight 
+                    sumG = Math.round(sumG / c / colorWeight) * colorWeight 
+                    sumB = Math.round(sumB / c / colorWeight) * colorWeight 
+                    sumA = Math.round(sumA / c / colorWeight) * colorWeight 
                     grayScale = (sumA + sumB + sumG) / 3
+                    if(grayScale > 0){
+                        const tmp = 256 / chars.length
+                        if(chars[Math.round(grayScale/tmp)-1]){
+                            textOutput.append(chars[Math.round(grayScale/tmp)-1])
+                        }
+                    }
                     if(isGrayScale)
                         outputCtx.fillStyle = `rgba(${grayScale},${grayScale},${grayScale},${sumA})`
                     else
@@ -57,8 +74,12 @@
                     outputCtx.fillRect(x,y,cellSize,cellSize)
 
                 }
+                textOutput.append("\n")
             }
-        }       
+        }
+        for(const c of chars){
+            textOutput.append(c)
+        }
     }
 </script>
 </html>
